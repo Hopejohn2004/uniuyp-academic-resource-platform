@@ -1,11 +1,23 @@
 const Database = require('better-sqlite3');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const DATA_DIR = process.env.DATA_DIR || __dirname;
+const isUnderTest = process.argv.includes('--test');
+const DATA_DIR = isUnderTest
+  ? fs.mkdtempSync(path.join(os.tmpdir(), 'uniuyp-test-'))
+  : (process.env.DATA_DIR || __dirname);
+if (isUnderTest) {
+  process.env.DATA_DIR = DATA_DIR; // keep uploads/router paths inside the same temp dir
+  process.on('exit', () => {
+    try { fs.rmSync(DATA_DIR, { recursive: true, force: true }); } catch { /* best effort */ }
+  });
+}
 const dbDir = path.join(DATA_DIR, 'db');
-require('fs').mkdirSync(dbDir, { recursive: true });
+fs.mkdirSync(dbDir, { recursive: true });
 const db = new Database(path.join(dbDir, 'platform.db'));
+db.DATA_DIR = DATA_DIR;
 db.pragma('foreign_keys = ON');
 db.pragma('journal_mode = WAL');
 db.pragma('busy_timeout = 5000');

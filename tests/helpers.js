@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const app = require('../server');
 
-const uploadsDir = path.join(process.env.DATA_DIR || path.join(__dirname, '..'), 'uploads');
+const uploadsDir = path.join(db.DATA_DIR, 'uploads');
 
 async function createServer() {
   const server = app.listen(0);
