@@ -4,7 +4,7 @@ const os = require('os');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const isUnderTest = process.argv.includes('--test');
+const isUnderTest = /^child-/.test(process.env.NODE_TEST_CONTEXT || '');
 const DATA_DIR = isUnderTest
   ? fs.mkdtempSync(path.join(os.tmpdir(), 'uniuyp-test-'))
   : (process.env.DATA_DIR || __dirname);
