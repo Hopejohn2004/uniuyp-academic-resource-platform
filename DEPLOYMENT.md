@@ -17,17 +17,24 @@ reads during writes and smooths out brief lock contention on a shared filesystem
 
 ## Render
 The repository includes a `render.yaml` blueprint. With the Render CLI or the "New →
-Blueprint" flow pointed at this repo, it provisions a Node web service with a 1 GB
-disk mounted at `/data`, plus the required environment variables.
+Blueprint" flow pointed at this repo it provisions a Node web service plus the required
+environment variables.
+
+> Free-tier services cannot mount persistent disks, so the deployed filesystem is
+> **ephemeral**: the SQLite database and `uploads/` are recreated on every deploy or
+> restart. That is acceptable for the demonstration. For persistent storage, upgrade
+> the service to a paid plan and add a disk, or use object storage plus a managed
+> database (see below).
 
 Set these secrets in the Render dashboard (marked `sync: false` in the blueprint):
 `BASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, `RESEND_API_KEY`,
 `RESEND_FROM_EMAIL`.
 
-`DATA_DIR` points to the mounted disk. The SQLite database lives at `$DATA_DIR/db/platform.db`
-and uploaded files at `$DATA_DIR/uploads` — both persist on the disk across deploys and restarts.
-Without a disk, use `/opt/render/project/src` as `DATA_DIR` for ephemeral storage (files are
-lost on redeploy), which is fine only for quick smoke tests.
+`DATA_DIR` is set to `/opt/render/project/src` (the ephemeral project directory):
+the SQLite database lives at `$DATA_DIR/db/platform.db` and uploaded files at
+`$DATA_DIR/uploads`. Because the DB is empty on each fresh deploy, the initial
+administrator account is recreated from `ADMIN_EMAIL`/`ADMIN_PASSWORD`/`ADMIN_NAME`
+on first boot — run `npm run seed` after deploying if you want the demo data back.
 
 **Important:** a normal ephemeral web-service filesystem is not suitable for permanent academic files or a production SQLite database. For production, move resource files to persistent object storage (such as Amazon S3) and move the database to a managed relational database. Keep SQLite for the final-year demonstration unless a production deployment is required.
 

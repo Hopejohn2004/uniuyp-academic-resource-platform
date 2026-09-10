@@ -5,17 +5,13 @@ services:
     plan: free
     buildCommand: npm ci
     startCommand: npm start
-    disk:
-      name: academic-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: DATA_DIR
-        value: /data
+        value: /opt/render/project/src
       - key: SESSION_SECRET
         generateValue: true
       - key: BASE_URL
