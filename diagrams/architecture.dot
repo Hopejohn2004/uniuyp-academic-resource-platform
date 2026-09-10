@@ -1,0 +1,35 @@
+digraph Architecture {
+  rankdir=TB;
+  graph [fontname="Helvetica", nodesep=0.7, ranksep=0.8, bgcolor="white"];
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  subgraph cluster_user {
+    label="User Layer (Presentation)";
+    fontname="Helvetica-Bold"; color="#2c4a7c"; style=rounded;
+    browser [label="Web Browser\n(HTML5, CSS3, JavaScript)\nStudent / Admin UI", fillcolor="#e8eef7", color="#2c4a7c"];
+  }
+
+  subgraph cluster_app {
+    label="Application Layer (Business Logic)";
+    fontname="Helvetica-Bold"; color="#1e4620"; style=rounded;
+    server [label="Node.js + Express Server", fillcolor="#eef3ee", color="#1e4620"];
+    auth [label="Authentication Module\n(bcrypt + sessions)", fillcolor="#eef3ee", color="#1e4620"];
+    resmod [label="Resource Management\nModule (upload/search/\ndownload)", fillcolor="#eef3ee", color="#1e4620"];
+  }
+
+  subgraph cluster_data {
+    label="Data Layer (Storage)";
+    fontname="Helvetica-Bold"; color="#a15c00"; style=rounded;
+    dbnode [label="SQLite Relational\nDatabase", fillcolor="#fdf2e2", color="#a15c00"];
+    filestore [label="File Storage\n(uploaded documents)", fillcolor="#fdf2e2", color="#a15c00"];
+  }
+
+  browser -> server [label="HTTPS Requests"];
+  server -> auth;
+  server -> resmod;
+  auth -> dbnode [label="verify credentials"];
+  resmod -> dbnode [label="CRUD metadata"];
+  resmod -> filestore [label="store / retrieve files"];
+  server -> browser [label="Rendered views\n(EJS templates)"];
+}

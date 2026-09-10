@@ -1,0 +1,59 @@
+digraph ERD {
+  rankdir=LR;
+  graph [fontname="Helvetica", nodesep=0.7, ranksep=1.0, bgcolor="white"];
+  node [shape=none, fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", dir=both, arrowhead=crow, arrowtail=none];
+
+  USERS [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>USERS</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">full_name</td></tr>
+      <tr><td align="left">matric_or_staff_no</td></tr>
+      <tr><td align="left">email (unique)</td></tr>
+      <tr><td align="left">password (hashed)</td></tr>
+      <tr><td align="left">department</td></tr>
+      <tr><td align="left">role (student / admin)</td></tr>
+      <tr><td align="left">created_at</td></tr>
+    </table>
+  >];
+
+  RESOURCES [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>RESOURCES</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">title</td></tr>
+      <tr><td align="left">description</td></tr>
+      <tr><td align="left">course_code</td></tr>
+      <tr><td align="left">FK  category_id</td></tr>
+      <tr><td align="left">file_name</td></tr>
+      <tr><td align="left">original_name</td></tr>
+      <tr><td align="left">file_size</td></tr>
+      <tr><td align="left">FK  uploaded_by</td></tr>
+      <tr><td align="left">created_at</td></tr>
+    </table>
+  >];
+
+  CATEGORIES [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>CATEGORIES</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">name</td></tr>
+    </table>
+  >];
+
+  DOWNLOADS [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>DOWNLOADS</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">FK  resource_id</td></tr>
+      <tr><td align="left">FK  user_id</td></tr>
+      <tr><td align="left">downloaded_at</td></tr>
+    </table>
+  >];
+
+  USERS -> RESOURCES [taillabel="1", headlabel="M", label="uploads"];
+  CATEGORIES -> RESOURCES [taillabel="1", headlabel="M", label="classifies"];
+  USERS -> DOWNLOADS [taillabel="1", headlabel="M", label="performs"];
+  RESOURCES -> DOWNLOADS [taillabel="1", headlabel="M", label="is logged in"];
+}

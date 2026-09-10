@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="auth-container">
+    <h2>Create Student Account</h2>
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <form method="POST" action="/register">
+      <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+      <label>Full Name</label>
+      <input name="full_name" required />
+      <label>Registration Number</label>
+      <input name="registration_number" required placeholder="e.g. 10-6-21/AC/CO/1069" />
+      <label>Department</label>
+      <select name="department_id" required>
+        <option value="">Select your department</option>
+        <% departments.forEach(d => { %>
+          <option value="<%= d.id %>"><%= d.name %> — <%= d.faculty_name %></option>
+        <% }) %>
+      </select>
+      <label>Email Address</label>
+      <input type="email" name="email" required />
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="At least 8 characters" />
+      <button type="submit">Register</button>
+    </form>
+    <p style="margin-top:16px; font-size:0.88rem;">Already have an account? <a class="link" href="/login">Log in</a></p>
+  </div>
+</body>
+</html>

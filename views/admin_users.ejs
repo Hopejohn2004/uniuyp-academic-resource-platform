@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Users - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>Manage Users</h1>
+      <a class="btn btn-outline" href="/admin/academics">Academic Structure</a>
+    </div>
+
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+
+    <p style="font-size:.86rem;color:#6b7280">Staff (lecturers and administrators) and students are listed in separate sections. Students are grouped under their department. Use the search bar and filters to narrow large lists.</p>
+
+    <form class="search-bar" method="GET" action="/admin/users">
+      <input name="q" value="<%= q %>" placeholder="e.g. 21/SC/CO/XXXX, staff ID, name or email">
+      <select name="faculty_id">
+        <option value="">All Faculties</option>
+        <% faculties.forEach(f => { %>
+          <option value="<%= f.id %>" <%= String(facultyId || '') === String(f.id) ? 'selected' : '' %>><%= f.name %></option>
+        <% }) %>
+      </select>
+      <select name="department_id">
+        <option value="">All Departments</option>
+        <% departments.forEach(d => { %>
+          <option value="<%= d.id %>" <%= String(departmentId || '') === String(d.id) ? 'selected' : '' %>><%= d.name %> — <%= d.faculty_name %></option>
+        <% }) %>
+      </select>
+      <select name="account_type">
+        <option value="">All Account Types</option>
+        <option value="student" <%= accountType === 'student' ? 'selected' : '' %>>Student</option>
+        <option value="lecturer" <%= accountType === 'lecturer' ? 'selected' : '' %>>Lecturer</option>
+        <option value="administrator" <%= accountType === 'administrator' ? 'selected' : '' %>>Administrator-Lecturer</option>
+      </select>
+      <button type="submit">Search</button>
+    </form>
+
+    <h3 style="color:#1e4620">Create New Account</h3>
+    <div class="card-form">
+      <form method="POST" action="/admin/users">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+        <label>Full Name</label>
+        <input name="full_name" required>
+        <label>Email</label>
+        <input type="email" name="email" required>
+        <label>Registration Number / Staff ID</label>
+        <input name="identifier" required placeholder="Student: 21/SC/CO/XXXX | Lecturer: UNIUYO/SC/CO/XXXX">
+        <label>Faculty & Department</label>
+        <select name="department_id" required>
+          <option value="">Select department</option>
+          <% departments.forEach(d => { %>
+            <option value="<%= d.id %>"><%= d.name %> — <%= d.faculty_name %></option>
+          <% }) %>
+        </select>
+        <label>Temporary Password</label>
+        <input type="password" name="password" required>
+        <label>Account Type</label>
+        <select name="account_type">
+          <option value="student">Student</option>
+          <option value="lecturer">Lecturer</option>
+          <option value="administrator">Administrator-Lecturer (can manage users)</option>
+        </select>
+        <button type="submit">Create Account</button>
+      </form>
+    </div>
+
+    <% if (showStaff) { %>
+      <h3 style="color:#1e4620;margin-top:32px">Lecturers & Administrators (<%= staffTotal %>)</h3>
+      <% if (!staff.length) { %><div class="empty-state">No staff found.</div><% } %>
+      <% staff.forEach(u => { const label = u.is_primary_admin ? 'Primary Administrator' : (u.account_type === 'administrator' ? 'Administrator-Lecturer' : 'Lecturer'); %>
+        <div class="resource-card">
+          <div style="flex:1">
+            <div class="r-title"><%= u.full_name %> <span class="badge"><%= label %></span></div>
+            <div class="r-meta">
+              <strong>Staff ID:</strong> <%= u.staff_id || u.matric_or_staff_no || '—' %> · <%= u.email %> · <%= u.department_name || u.department || 'No department' %><% if (u.faculty_name) { %> · <%= u.faculty_name %><% } %>
+            </div>
+            <details style="margin-top:10px">
+              <summary>Edit account</summary>
+              <form method="POST" action="/admin/users/<%= u.id %>/update" style="margin-top:10px;display:grid;gap:7px">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <input name="full_name" value="<%= u.full_name %>" required>
+                <input type="email" name="email" value="<%= u.email %>" required>
+                <input name="identifier" value="<%= u.staff_id || u.matric_or_staff_no || '' %>" required>
+                <select name="department_id" required>
+                  <% departments.forEach(d => { %>
+                    <option value="<%= d.id %>" <%= String(u.department_id) === String(d.id) ? 'selected' : '' %>><%= d.name %> — <%= d.faculty_name %></option>
+                  <% }) %>
+                </select>
+                <select name="account_type" <%= u.is_primary_admin ? 'disabled' : '' %>>
+                  <option value="student" <%= u.account_type === 'student' ? 'selected' : '' %>>Student</option>
+                  <option value="lecturer" <%= u.account_type === 'lecturer' ? 'selected' : '' %>>Lecturer</option>
+                  <option value="administrator" <%= u.account_type === 'administrator' ? 'selected' : '' %>>Administrator-Lecturer</option>
+                </select>
+                <% if (u.is_primary_admin) { %><input type="hidden" name="account_type" value="administrator"><% } %>
+                <button type="submit">Save Changes</button>
+              </form>
+            </details>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <% if (u.id !== currentUser.id && !u.is_primary_admin) { %>
+              <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this user account?');">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <button class="btn btn-danger" type="submit">Delete</button>
+              </form>
+            <% } else if (u.is_primary_admin) { %>
+              <span style="font-size:.8rem;color:#1e4620;font-weight:600">Protected</span>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+      <% if (staffTotalPages > 1) { %>
+        <div class="pagination">
+          <% if (page > 1) { %><a class="btn btn-outline" href="/admin/users?q=<%= encodeURIComponent(q) %>&faculty_id=<%= facultyId || '' %>&department_id=<%= departmentId || '' %>&account_type=<%= accountType %>&page=<%= page - 1 %>">Previous</a><% } %>
+          <span>Page <%= page %> of <%= staffTotalPages %></span>
+          <% if (page < staffTotalPages) { %><a class="btn btn-outline" href="/admin/users?q=<%= encodeURIComponent(q) %>&faculty_id=<%= facultyId || '' %>&department_id=<%= departmentId || '' %>&account_type=<%= accountType %>&page=<%= page + 1 %>">Next</a><% } %>
+        </div>
+      <% } %>
+    <% } %>
+
+    <% if (showStudents) { %>
+      <h3 style="color:#1e4620;margin-top:32px">Students (<%= studentTotal %>)</h3>
+      <% if (!studentGroups.length) { %><div class="empty-state">No students found.</div><% } %>
+      <% studentGroups.forEach(g => { %>
+        <h4 style="color:var(--primary);margin:24px 0 10px;border-bottom:2px solid #e2e5e2;padding-bottom:6px"><%= g.name %> <span class="badge"><%= g.students.length %></span></h4>
+        <% g.students.forEach(u => { %>
+          <div class="resource-card">
+            <div style="flex:1">
+              <div class="r-title"><%= u.full_name %></div>
+              <div class="r-meta"><strong>Reg. No.:</strong> <%= u.registration_number || u.matric_or_staff_no || '—' %> · <%= u.email %></div>
+              <details style="margin-top:10px">
+                <summary>Edit student</summary>
+                <form method="POST" action="/admin/users/<%= u.id %>/update" style="margin-top:10px;display:grid;gap:7px">
+                  <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                  <input name="full_name" value="<%= u.full_name %>" required>
+                  <input type="email" name="email" value="<%= u.email %>" required>
+                  <input name="identifier" value="<%= u.registration_number || u.matric_or_staff_no || '' %>" required>
+                  <select name="department_id" required>
+                    <% departments.forEach(d => { %>
+                      <option value="<%= d.id %>" <%= String(u.department_id) === String(d.id) ? 'selected' : '' %>><%= d.name %> — <%= d.faculty_name %></option>
+                    <% }) %>
+                  </select>
+                  <input type="hidden" name="account_type" value="student">
+                  <button type="submit">Save Changes</button>
+                </form>
+              </details>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this student account?');">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <button class="btn btn-danger" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      <% }) %>
+    <% } %>
+  </div>
+</body>
+</html>

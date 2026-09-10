@@ -1,0 +1,31 @@
+sequenceDiagram
+    actor A as Administrator
+    actor S as Student
+    participant B as Web Browser
+    participant Srv as Express Server
+    participant DB as SQLite Database
+    participant FS as File Storage
+
+    Note over A,FS: Upload Flow
+    A->>B: Fill upload form and submit file
+    B->>Srv: POST /upload (multipart form)
+    Srv->>Srv: Validate session (admin only)
+    Srv->>FS: Save file to /uploads
+    Srv->>DB: INSERT resource metadata
+    DB-->>Srv: Success
+    Srv-->>B: Redirect to dashboard + success message
+    B-->>A: Show updated resource list
+
+    Note over S,FS: Search and Download Flow
+    S->>B: Enter search keyword / select category
+    B->>Srv: GET /dashboard?q=...&category=...
+    Srv->>DB: SELECT resources WHERE title/course LIKE ?
+    DB-->>Srv: Matching resource rows
+    Srv-->>B: Render filtered resource list
+    S->>B: Click Download
+    B->>Srv: GET /resources/:id/download
+    Srv->>DB: INSERT download log
+    Srv->>FS: Read file
+    FS-->>Srv: File stream
+    Srv-->>B: Deliver file to browser
+    B-->>S: File saved to device

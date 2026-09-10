@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Downloads - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>My Downloads</h1>
+    </div>
+
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+
+    <% if (downloads.length === 0) { %>
+      <div class="empty-state">You have not downloaded any resources yet.</div>
+    <% } %>
+
+    <% downloads.forEach(d => { %>
+      <div class="resource-card">
+        <div>
+          <div class="r-title"><%= d.title %> <% if (d.category_name) { %><span class="badge"><%= d.category_name %></span><% } %></div>
+          <div class="r-meta">
+            <% if (d.course_catalog_code || d.course_code) { %><%= d.course_catalog_code || d.course_code %><% if (d.course_title) { %> — <%= d.course_title %><% } %> &middot; <% } %>
+            Downloaded on <%= new Date(d.downloaded_at).toDateString() %>
+            &middot; <%= (d.file_size/1024).toFixed(0) %> KB
+          </div>
+        </div>
+        <a class="btn" href="/resources/<%= d.resource_id %>/download">Download Again</a>
+      </div>
+    <% }) %>
+  </div>
+</body>
+</html>

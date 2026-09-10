@@ -1,0 +1,12 @@
+node_modules/
+.env
+db/
+uploads/*
+!uploads/.gitkeep
+*.log
+
+# Personal working documents (defense prep, drafts, sample data)
+*.docx
+sample_note.txt
+sample_pq.txt
+sample_proj.txt

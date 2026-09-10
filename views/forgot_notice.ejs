@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Password Reset - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="auth-container">
+    <h2>Check Your Email</h2>
+    <p>If an account exists for <strong><%= email %></strong>, a password reset link has been sent.</p>
+    <p class="muted">For local demo testing without an email provider, check the server terminal for the reset link.</p>
+    <p><a class="link" href="/login">Back to Login</a></p>
+  </div>
+</body>
+</html>

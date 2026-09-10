@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Courses - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>Courses</h1>
+      <p style="font-size:.86rem;color:#6b7280;margin:0;">Students only see courses their department is eligible for. Lecturers and administrators see all courses.</p>
+    </div>
+
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+
+    <% if (courses.length === 0) { %>
+      <div class="empty-state">No courses available yet.</div>
+    <% } %>
+
+    <% courses.forEach(c => { %>
+      <div class="resource-card">
+        <div>
+          <div class="r-title">
+            <a class="link" href="/courses/<%= c.id %>"><%= c.code %></a> — <%= c.title %>
+          </div>
+          <div class="r-meta">
+            Owner: <%= c.owner_department || '—' %>
+            <% if (c.level) { %> &middot; <%= c.level %><% } %>
+            &middot; <%= c.resource_count %> resource<%= c.resource_count === 1 ? '' : 's' %>
+            <% if (c.offered_count > 0) { %> &middot; <%= c.offered_count %> department<%= c.offered_count === 1 ? '' : 's' %><% } %>
+          </div>
+        </div>
+        <a class="btn" href="/courses/<%= c.id %>">View Course</a>
+      </div>
+    <% }) %>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (page > 1) { %><a class="btn btn-outline" href="/courses?page=<%= page - 1 %>">Previous</a><% } %>
+        <span>Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %><a class="btn btn-outline" href="/courses?page=<%= page + 1 %>">Next</a><% } %>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

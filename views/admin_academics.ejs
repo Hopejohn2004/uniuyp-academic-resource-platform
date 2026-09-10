@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Academic Structure - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>Academic Structure</h1>
+      <a class="btn btn-outline" href="/admin/users">Manage Users</a>
+    </div>
+
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+
+    <p style="font-size:.88rem;color:#6b7280">
+      Faculties, departments and courses are database-managed. Nothing here is limited to a fixed list of departments.
+      A course has one owner department but can be offered to any number of departments.
+    </p>
+
+    <!-- ========== FACULTIES ========== -->
+    <div class="card-form">
+      <h3>Faculties</h3>
+      <form method="POST" action="/admin/academics/faculties">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+        <input name="name" required placeholder="e.g. Faculty of Computing" />
+        <button>Add Faculty</button>
+      </form>
+      <% faculties.forEach(f => { %>
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center">
+          <form method="POST" action="/admin/academics/faculties/<%= f.id %>/update" style="display:flex; gap:6px; flex:1">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+            <input name="name" value="<%= f.name %>" required />
+            <button type="submit">Save</button>
+          </form>
+          <form method="POST" action="/admin/academics/faculties/<%= f.id %>/delete" onsubmit="return confirm('Delete this faculty?');">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+            <button class="btn btn-danger" type="submit">Delete</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- ========== DEPARTMENTS ========== -->
+    <div class="card-form">
+      <h3>Departments</h3>
+      <form method="POST" action="/admin/academics/departments">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+        <input name="name" required placeholder="e.g. Mathematics" />
+        <select name="faculty_id" required>
+          <option value="">Select faculty</option>
+          <% faculties.forEach(f => { %>
+            <option value="<%= f.id %>"><%= f.name %></option>
+          <% }) %>
+        </select>
+        <button>Add Department</button>
+      </form>
+      <% departments.forEach(d => { %>
+        <div style="margin-top:12px">
+          <form method="POST" action="/admin/academics/departments/<%= d.id %>/update" style="display:grid; gap:6px">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+            <input name="name" value="<%= d.name %>" required />
+            <select name="faculty_id" required>
+              <% faculties.forEach(f => { %>
+                <option value="<%= f.id %>" <%= String(d.faculty_id) === String(f.id) ? 'selected' : '' %>><%= f.name %></option>
+              <% }) %>
+            </select>
+            <div style="display:flex; gap:6px">
+              <button type="submit">Save Department</button>
+          </form>
+          <form method="POST" action="/admin/academics/departments/<%= d.id %>/delete" onsubmit="return confirm('Delete this department?');">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+            <button class="btn btn-danger" type="submit">Delete</button>
+          </form>
+            </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- ========== COURSES ========== -->
+    <div class="card-form">
+      <h3>Courses</h3>
+      <form method="POST" action="/admin/academics/courses">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+        <input name="code" required placeholder="CSC 201" />
+        <input name="title" required placeholder="Introduction to Computer Science" />
+        <select name="owner_department_id" required>
+          <option value="">Owner department</option>
+          <% departments.forEach(d => { %>
+            <option value="<%= d.id %>"><%= d.name %> — <%= d.faculty_name %></option>
+          <% }) %>
+        </select>
+        <input name="level" placeholder="e.g. 200 Level" />
+        <button>Add Course</button>
+      </form>
+    </div>
+
+    <h3 style="color:#1e4620">Courses &amp; Cross-Department Access</h3>
+    <% courses.forEach(c => {
+      const offeredIds = (c.offered_department_ids || '').split(',').filter(Boolean);
+    %>
+      <div class="resource-card">
+        <div style="flex:1">
+          <div class="r-title"><%= c.code %> — <%= c.title %></div>
+          <div class="r-meta">
+            Owner: <%= c.owner_department || 'Unassigned' %> · Level: <%= c.level || '—' %>
+            <br />
+            Currently offered to: <%= c.offered_departments || 'None' %>
+          </div>
+
+          <details style="margin-top:10px">
+            <summary>Edit course</summary>
+            <form method="POST" action="/admin/academics/courses/<%= c.id %>/update" style="margin-top:10px; display:grid; gap:7px">
+              <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+              <input name="code" value="<%= c.code %>" required />
+              <input name="title" value="<%= c.title %>" required />
+              <select name="owner_department_id" required>
+                <% departments.forEach(d => { %>
+                  <option value="<%= d.id %>" <%= String(c.owner_department_id) === String(d.id) ? 'selected' : '' %>><%= d.name %> — <%= d.faculty_name %></option>
+                <% }) %>
+              </select>
+              <input name="level" value="<%= c.level || '' %>" />
+              <button type="submit">Save Course</button>
+            </form>
+          </details>
+
+          <details style="margin-top:10px">
+            <summary>Set departments that can take/access this course</summary>
+            <form method="POST" action="/admin/academics/courses/<%= c.id %>/departments" style="margin-top:10px">
+              <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+              <div style="display:grid; gap:5px">
+                <% departments.forEach(d => { %>
+                  <label>
+                    <input type="checkbox" name="department_ids" value="<%= d.id %>" <%= offeredIds.includes(String(d.id)) ? 'checked' : '' %> />
+                    <%= d.name %> — <%= d.faculty_name %>
+                  </label>
+                <% }) %>
+              </div>
+              <button type="submit" style="margin-top:10px">Save Course Access</button>
+            </form>
+          </details>
+        </div>
+        <div>
+          <form method="POST" action="/admin/academics/courses/<%= c.id %>/delete" onsubmit="return confirm('Delete this course? Existing resources will be kept but unlinked.');">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+            <button class="btn btn-danger" type="submit">Delete</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</body>
+</html>

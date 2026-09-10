@@ -1,0 +1,81 @@
+digraph ClassDiagram {
+  rankdir=TB;
+  graph [fontname="Helvetica", nodesep=0.6, ranksep=0.9, bgcolor="white"];
+  node [shape=none, fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  User [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>User</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- fullName: string</td></tr>
+      <tr><td align="left">- email: string</td></tr>
+      <tr><td align="left">- password: string</td></tr>
+      <tr><td align="left">- role: string</td></tr>
+      <tr><td align="left">+ register()</td></tr>
+      <tr><td align="left">+ login()</td></tr>
+      <tr><td align="left">+ logout()</td></tr>
+    </table>
+  >];
+
+  Student [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#eef3ee"><b>Student</b></td></tr>
+      <tr><td align="left">- matricNo: string</td></tr>
+      <tr><td align="left">- department: string</td></tr>
+      <tr><td align="left">+ searchResources()</td></tr>
+      <tr><td align="left">+ downloadResource()</td></tr>
+    </table>
+  >];
+
+  Admin [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#fdf2e2"><b>Administrator</b></td></tr>
+      <tr><td align="left">- staffNo: string</td></tr>
+      <tr><td align="left">+ uploadResource()</td></tr>
+      <tr><td align="left">+ deleteResource()</td></tr>
+      <tr><td align="left">+ manageCategories()</td></tr>
+      <tr><td align="left">+ viewStatistics()</td></tr>
+    </table>
+  >];
+
+  Resource [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>Resource</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- title: string</td></tr>
+      <tr><td align="left">- courseCode: string</td></tr>
+      <tr><td align="left">- fileName: string</td></tr>
+      <tr><td align="left">- fileSize: int</td></tr>
+      <tr><td align="left">- uploadedBy: int</td></tr>
+      <tr><td align="left">+ save()</td></tr>
+      <tr><td align="left">+ delete()</td></tr>
+    </table>
+  >];
+
+  Category [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>Category</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- name: string</td></tr>
+    </table>
+  >];
+
+  Download [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>DownloadLog</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- resourceId: int</td></tr>
+      <tr><td align="left">- userId: int</td></tr>
+      <tr><td align="left">- downloadedAt: datetime</td></tr>
+      <tr><td align="left">+ record()</td></tr>
+    </table>
+  >];
+
+  Student -> User [arrowhead=empty, label="  inherits"];
+  Admin -> User [arrowhead=empty, label="  inherits"];
+  Resource -> Category [arrowhead=diamond, label="  belongs to"];
+  Resource -> Admin [arrowhead=vee, label="  uploaded by", dir=back];
+  Download -> Resource [arrowhead=vee, label="  references"];
+  Download -> Student [arrowhead=vee, label="  initiated by"];
+}

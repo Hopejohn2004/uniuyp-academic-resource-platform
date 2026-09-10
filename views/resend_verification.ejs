@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resend Verification - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="auth-container">
+    <h2>Resend Verification Link</h2>
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+    <form method="POST" action="/resend-verification">
+      <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+      <label>Email Address</label>
+      <input type="email" name="email" required placeholder="you@uniuyo.edu.ng" />
+      <button type="submit">Send New Link</button>
+    </form>
+    <p style="margin-top:16px; font-size:0.88rem;"><a class="link" href="/login">Back to Login</a></p>
+  </div>
+</body>
+</html>

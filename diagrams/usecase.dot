@@ -1,0 +1,47 @@
+digraph UseCase {
+  rankdir=LR;
+  graph [fontname="Helvetica", nodesep=0.6, ranksep=1.1, splines=true, bgcolor="white"];
+  node [fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  subgraph cluster_system {
+    label="Web-Based Academic Resource Platform";
+    fontname="Helvetica-Bold";
+    fontsize=13;
+    style=rounded;
+    color="#1e4620";
+    penwidth=1.6;
+    margin=30;
+
+    uc1  [shape=ellipse, label="Register\nAccount",        style=filled, fillcolor="#eef3ee", color="#1e4620"];
+    uc2  [shape=ellipse, label="Log In",                    style=filled, fillcolor="#eef3ee", color="#1e4620"];
+    uc3  [shape=ellipse, label="Search / Filter\nResources", style=filled, fillcolor="#eef3ee", color="#1e4620"];
+    uc4  [shape=ellipse, label="Download\nResource",        style=filled, fillcolor="#eef3ee", color="#1e4620"];
+    uc5  [shape=ellipse, label="View Resource\nDetails",    style=filled, fillcolor="#eef3ee", color="#1e4620"];
+    uc6  [shape=ellipse, label="Upload\nResource",          style=filled, fillcolor="#fdf2e2", color="#a15c00"];
+    uc7  [shape=ellipse, label="Manage\nCategories",        style=filled, fillcolor="#fdf2e2", color="#a15c00"];
+    uc8  [shape=ellipse, label="Delete\nResource",          style=filled, fillcolor="#fdf2e2", color="#a15c00"];
+    uc9  [shape=ellipse, label="View Platform\nStatistics",  style=filled, fillcolor="#fdf2e2", color="#a15c00"];
+    uc10 [shape=ellipse, label="Log Out",                    style=filled, fillcolor="#eef3ee", color="#1e4620"];
+  }
+
+  student [shape=box, style="rounded,filled", fillcolor="#e8eef7", color="#2c4a7c", label="Student"];
+  admin   [shape=box, style="rounded,filled", fillcolor="#e8eef7", color="#2c4a7c", label="Administrator\n(Lecturer/Library Staff)"];
+
+  student -> uc1;
+  student -> uc2;
+  student -> uc3;
+  student -> uc4;
+  student -> uc5;
+  student -> uc10;
+
+  admin -> uc2;
+  admin -> uc6;
+  admin -> uc7;
+  admin -> uc8;
+  admin -> uc9;
+  admin -> uc10;
+
+  uc4 -> uc2 [style=dashed, label="<<include>>", arrowhead=empty];
+  uc6 -> uc2 [style=dashed, label="<<include>>", arrowhead=empty];
+}

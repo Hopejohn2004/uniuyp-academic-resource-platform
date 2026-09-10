@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="auth-container">
+    <h2>Welcome Back</h2>
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+    <form method="POST" action="/login">
+      <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+      <label>Email Address</label>
+      <input type="email" name="email" required placeholder="you@uniuyo.edu.ng" />
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="••••••••" />
+      <button type="submit">Log In</button>
+    </form>
+    <p style="margin-top:16px; font-size:0.88rem;">No account? <a class="link" href="/register">Register here</a></p>
+    <p style="font-size:0.85rem;"><a class="link" href="/forgot-password">Forgot your password?</a></p>
+  </div>
+</body>
+</html>

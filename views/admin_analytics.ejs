@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Analytics - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>Platform Analytics</h1>
+      <a class="btn btn-outline" href="/admin/users">Manage Users</a>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="num"><%= stats.totalResources %></div><div class="label">Resources</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalDownloads %></div><div class="label">Total Downloads</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalStudents %></div><div class="label">Students</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalStaff %></div><div class="label">Lecturers / Admins</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalCourses %></div><div class="label">Courses</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalCategories %></div><div class="label">Categories</div></div>
+    </div>
+
+    <div class="card-form" style="max-width:none;margin-bottom:22px">
+      <h3 style="margin-top:0">Downloads by Day (last 14 days)</h3>
+      <% if (!downloadsPerDay.length) { %><div class="muted">No downloads recorded yet.</div><% } %>
+      <div class="bar-chart">
+        <% downloadsPerDay.slice().reverse().forEach(d => { %>
+          <div class="bar-col">
+            <div class="bar" style="height:<%= Math.max(4, Math.round(d.c * 36)) %>px" title="<%= d.c %> download<%= d.c === 1 ? '' : 's' %>"></div>
+            <div class="bar-label"><%= d.d.substring(5) %></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="card-form" style="max-width:none">
+        <h3 style="margin-top:0">Most Downloaded Resources</h3>
+        <% if (!topResources.length) { %><div class="muted">No resources yet.</div><% } %>
+        <table class="data-table">
+          <thead><tr><th>Resource</th><th>Uploader</th><th>Downloads</th><th>Last Downloaded</th></tr></thead>
+          <tbody>
+            <% topResources.forEach(r => { %>
+              <tr>
+                <td><%= r.title %></td>
+                <td><%= r.owner || 'Admin' %></td>
+                <td><%= r.downloads %></td>
+                <td><%= String(r.last_download).substring(0,10) || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-form" style="max-width:none">
+        <h3 style="margin-top:0">Students by Department</h3>
+        <% if (!departmentTotals.length) { %><div class="muted">No students yet.</div><% } %>
+        <table class="data-table">
+          <thead><tr><th>Department</th><th>Students</th></tr></thead>
+          <tbody>
+            <% departmentTotals.forEach(d => { %>
+              <tr><td><%= d.name %></td><td><%= d.students %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-form" style="max-width:none">
+        <h3 style="margin-top:0">Resources by Category</h3>
+        <% if (!categoryTotals.length) { %><div class="muted">No categories yet.</div><% } %>
+        <table class="data-table">
+          <thead><tr><th>Category</th><th>Resources</th></tr></thead>
+          <tbody>
+            <% categoryTotals.forEach(c => { %>
+              <tr><td><%= c.name %></td><td><%= c.resources %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-form" style="max-width:none">
+        <h3 style="margin-top:0">Top Uploaders</h3>
+        <% if (!uploaders.length) { %><div class="muted">No uploads yet.</div><% } %>
+        <table class="data-table">
+          <thead><tr><th>Uploader</th><th>Resources</th></tr></thead>
+          <tbody>
+            <% uploaders.forEach(u => { %>
+              <tr><td><%= u.name %></td><td><%= u.resources %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

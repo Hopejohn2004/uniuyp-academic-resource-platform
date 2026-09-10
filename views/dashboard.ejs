@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+
+    <div class="page-header">
+      <h1>Academic Resources</h1>
+      <% if (['lecturer','administrator'].includes(currentUser.accountType)) { %>
+        <a class="btn" href="/upload">+ Upload Resource</a>
+      <% } %>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="num"><%= stats.totalResources %></div><div class="label">Total Resources</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalStudents %></div><div class="label">Registered Students</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalLecturers %></div><div class="label">Lecturers</div></div>
+      <div class="stat-card"><div class="num"><%= stats.totalDownloads %></div><div class="label">Total Downloads</div></div>
+    </div>
+
+    <form class="search-bar" method="GET" action="/dashboard">
+      <input type="text" name="q" value="<%= q %>" placeholder="Search resources, course code or course title..." />
+      <select name="category">
+        <option value="">All Categories</option>
+        <% categories.forEach(c => { %>
+          <option value="<%= c.id %>" <%= String(categoryId) === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+        <% }) %>
+      </select>
+      <button type="submit">Search</button>
+    </form>
+
+    <% if (resources.length === 0) { %>
+      <div class="empty-state">No resources found. <% if (['lecturer','administrator'].includes(currentUser.accountType)) { %>Try uploading one.<% } %></div>
+    <% } %>
+
+    <% resources.forEach(r => { %>
+      <div class="resource-card">
+        <div>
+          <div class="r-title"><%= r.title %> <% if (r.category_name) { %><span class="badge"><%= r.category_name %></span><% } %></div>
+          <div class="r-meta">
+            <% if (r.course_id) { %><a class="link" href="/courses/<%= r.course_id %>"><%= r.course_catalog_code || r.course_code %></a><% if (r.course_title) { %> — <a class="link" href="/courses/<%= r.course_id %>"><%= r.course_title %></a><% } %> &middot; <% } else if (r.course_catalog_code || r.course_code) { %><%= r.course_catalog_code || r.course_code %><% if (r.course_title) { %> — <%= r.course_title %><% } %> &middot; <% } %><% if (r.level) { %><%= r.level %> &middot; <% } %><% if (r.semester) { %><%= r.semester %> &middot; <% } %><% if (r.download_count) { %><strong><%= r.download_count %></strong> download<%= r.download_count === 1 ? '' : 's' %> &middot; <% } %>
+            Uploaded by <%= r.uploader || 'Admin' %> on <%= new Date(r.created_at).toDateString() %>
+            &middot; <%= (r.file_size/1024).toFixed(0) %> KB
+          </div>
+          <% if (r.description) { %><div style="font-size:0.85rem; margin-top:6px;"><%= r.description %></div><% } %>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a class="btn" href="/resources/<%= r.id %>/download">Download</a>
+          <% if (currentUser.accountType === 'administrator' || Number(r.uploaded_by) === Number(currentUser.id)) { %>
+            <a class="btn btn-outline" href="/resources/<%= r.id %>/edit">Edit</a>
+            <form method="POST" action="/resources/<%= r.id %>/delete" onsubmit="return confirm('Delete this resource?');">
+              <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    <% }) %>
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (page > 1) { %><a class="btn btn-outline" href="/dashboard?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(categoryId) %>&page=<%= page - 1 %>">Previous</a><% } %>
+        <span>Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %><a class="btn btn-outline" href="/dashboard?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(categoryId) %>&page=<%= page + 1 %>">Next</a><% } %>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

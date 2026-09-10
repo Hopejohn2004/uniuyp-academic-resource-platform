@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Resource - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>Upload Academic Resource</h1>
+    </div>
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <div class="card-form">
+      <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
+        <label>Title</label>
+        <input name="title" required placeholder="e.g. CSC 201 Lecture Note - Week 5" />
+        <label>Course</label>
+        <select name="course_id" required>
+          <option value="">Select course</option>
+          <% courses.forEach(c => { %>
+            <option value="<%= c.id %>"><%= c.code %> — <%= c.title %> (Owner: <%= c.owner_department || '—' %>)</option>
+          <% }) %>
+        </select>
+        <label>Level</label>
+        <input name="level" placeholder="e.g. 200 Level" />
+        <label>Semester</label>
+        <select name="semester">
+          <option value="">Select semester</option>
+          <option value="First Semester">First Semester</option>
+          <option value="Second Semester">Second Semester</option>
+        </select>
+        <label>Academic Session</label>
+        <input name="academic_session" placeholder="e.g. 2026/2027" />
+        <label>Category</label>
+        <select name="category_id">
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+        <label>Description</label>
+        <textarea name="description" rows="3"></textarea>
+        <label>File</label>
+        <input type="file" name="file" required />
+        <small>Maximum file size: 100 MB</small>
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<div class="navbar">
+  <div class="brand">UNIUYO <span>Academic Resource Platform</span></div>
+  <div>
+    <% if (currentUser) { %>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/courses">Courses</a>
+      <% if (['lecturer','administrator'].includes(currentUser.accountType)) { %><a href="/my-uploads">My Uploads</a><a href="/upload">Upload Resource</a><% } %>
+      <% if (!['lecturer','administrator'].includes(currentUser.accountType)) { %><a href="/my-downloads">My Downloads</a><% } %>
+      <% if (currentUser.canManageUsers) { %><a href="/admin/users">Manage Users</a><a href="/admin/academics">Academic Structure</a><a href="/admin/analytics">Analytics</a><% } %>
+      <a href="/change-password">Change Password</a>
+      <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </div>
+</div>

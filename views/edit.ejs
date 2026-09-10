@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit Resource - Academic Resource Platform</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <div class="page-header">
+      <h1>Edit Resource</h1>
+      <a class="btn btn-outline" href="/dashboard">Back to Dashboard</a>
+    </div>
+
+    <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
+    <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
+
+    <div class="card-form">
+      <form method="POST" action="/resources/<%= resource.id %>/edit">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+        <label>Title</label>
+        <input name="title" value="<%= resource.title %>" required>
+        <label>Course</label>
+        <select name="course_id">
+          <option value="">No course (general resource)</option>
+          <% courses.forEach(c => { %>
+            <option value="<%= c.id %>" <%= String(resource.course_id) === String(c.id) ? 'selected' : '' %>><%= c.code %> — <%= c.title %></option>
+          <% }) %>
+        </select>
+        <label>Level</label>
+        <input name="level" value="<%= resource.level || '' %>" placeholder="e.g. 200 Level">
+        <label>Semester</label>
+        <select name="semester">
+          <option value="">Select semester</option>
+          <option value="First Semester" <%= resource.semester === 'First Semester' ? 'selected' : '' %>>First Semester</option>
+          <option value="Second Semester" <%= resource.semester === 'Second Semester' ? 'selected' : '' %>>Second Semester</option>
+        </select>
+        <label>Academic Session</label>
+        <input name="academic_session" value="<%= resource.academic_session || '' %>" placeholder="e.g. 2026/2027">
+        <label>Category</label>
+        <select name="category_id">
+          <option value="">No category</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>" <%= String(resource.category_id) === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+        <label>Description</label>
+        <textarea name="description" rows="3"><%= resource.description || '' %></textarea>
+        <small>Metadata only. To replace the uploaded file, delete this resource and upload a new one.</small>
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
