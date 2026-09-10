@@ -28,6 +28,7 @@ const createDashboardRoutes = require('./routes/dashboard');
 const createAdminRoutes = require('./routes/admin');
 
 const app = express();
+app.set('trust proxy', 1); // Render terminates TLS at its proxy; needed for secure cookies
 const PORT = Number(process.env.PORT || 3000);
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
