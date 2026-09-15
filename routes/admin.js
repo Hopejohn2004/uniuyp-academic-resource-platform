@@ -9,13 +9,7 @@ module.exports = function createAdminRoutes(config) {
     return db.prepare('SELECT id, full_name, account_type, can_manage_users, is_primary_admin FROM users WHERE id = ?').get(id);
   }
 
-  function getDepartments() {
-    return db.prepare(
-      `SELECT d.id, d.name, d.faculty_id, f.name AS faculty_name
-       FROM departments d JOIN faculties f ON f.id = d.faculty_id
-       ORDER BY f.name, d.name`
-    ).all();
-  }
+
 
   function getFaculties() {
     return db.prepare('SELECT * FROM faculties ORDER BY name').all();
@@ -63,15 +57,18 @@ module.exports = function createAdminRoutes(config) {
       ).all(...params, pageSize, offset);
     }
 
-    // Students grouped by department
+    // Students grouped by department, paginated
     const showStudents = accountType === '' || accountType === 'student';
-    let studentGroups = [], studentTotal = 0;
+    let studentGroups = [], studentTotal = 0, studentTotalPages = 1, spage = 1;
     if (showStudents) {
       const sw = `${where} AND u.account_type = 'student'`;
+      studentTotal = db.prepare(`SELECT COUNT(*) c FROM users u${sw}`).get(...params).c;
+      studentTotalPages = Math.max(1, Math.ceil(studentTotal / pageSize));
+      spage = Math.min(Math.max(1, parseInt(req.query.spage, 10) || 1), studentTotalPages);
+      const offset = (spage - 1) * pageSize;
       const students = db.prepare(
-        `${baseSelect}${sw} ORDER BY d.name COLLATE NOCASE, u.full_name COLLATE NOCASE`
-      ).all(...params);
-      studentTotal = students.length;
+        `${baseSelect}${sw} ORDER BY d.name COLLATE NOCASE, u.full_name COLLATE NOCASE LIMIT ? OFFSET ?`
+      ).all(...params, pageSize, offset);
       const map = new Map();
       for (const s of students) {
         const key = s.department_name || 'No Department Assigned';
@@ -82,9 +79,9 @@ module.exports = function createAdminRoutes(config) {
     }
 
     res.render('admin_users', {
-      staff, staffTotal, staffTotalPages, studentGroups, studentTotal,
+      staff, staffTotal, staffTotalPages, studentGroups, studentTotal, studentTotalPages, spage,
       showStaff, showStudents,
-      faculties: getFaculties(), departments: getDepartments(),
+      faculties: getFaculties(), departments: config.getDepartments(),
       q, facultyId, departmentId, accountType, page
     });
   });
@@ -216,7 +213,7 @@ module.exports = function createAdminRoutes(config) {
 
   router.get('/admin/academics', requireLogin, requireSuperAdmin, (req, res) => {
     const faculties = getFaculties();
-    const departments = getDepartments();
+    const departments = config.getDepartments();
     const courses = db.prepare(
       `SELECT c.*, d.name owner_department,
               (SELECT group_concat(d2.name, ', ')

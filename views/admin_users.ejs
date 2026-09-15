@@ -16,7 +16,7 @@
     <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
     <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
 
-    <p style="font-size:.86rem;color:#6b7280">Staff (lecturers and administrators) and students are listed in separate sections. Students are grouped under their department. Use the search bar and filters to narrow large lists.</p>
+    <p class="hint">Staff (lecturers and administrators) and students are listed in separate sections. Students are grouped under their department. Use the search bar and filters to narrow large lists.</p>
 
     <form class="search-bar" method="GET" action="/admin/users">
       <input name="q" value="<%= q %>" placeholder="e.g. 21/SC/CO/XXXX, staff ID, name or email">
@@ -41,7 +41,7 @@
       <button type="submit">Search</button>
     </form>
 
-    <h3 style="color:#1e4620">Create New Account</h3>
+    <h3 class="group-heading">Create New Account</h3>
     <div class="card-form">
       <form method="POST" action="/admin/users">
         <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
@@ -71,18 +71,18 @@
     </div>
 
     <% if (showStaff) { %>
-      <h3 style="color:#1e4620;margin-top:32px">Lecturers & Administrators (<%= staffTotal %>)</h3>
+      <h3 class="group-heading-lg">Lecturers & Administrators (<%= staffTotal %>)</h3>
       <% if (!staff.length) { %><div class="empty-state">No staff found.</div><% } %>
       <% staff.forEach(u => { const label = u.is_primary_admin ? 'Primary Administrator' : (u.account_type === 'administrator' ? 'Administrator-Lecturer' : 'Lecturer'); %>
         <div class="resource-card">
-          <div style="flex:1">
+          <div class="grow">
             <div class="r-title"><%= u.full_name %> <span class="badge"><%= label %></span></div>
             <div class="r-meta">
               <strong>Staff ID:</strong> <%= u.staff_id || u.matric_or_staff_no || '—' %> · <%= u.email %> · <%= u.department_name || u.department || 'No department' %><% if (u.faculty_name) { %> · <%= u.faculty_name %><% } %>
             </div>
-            <details style="margin-top:10px">
+            <details class="mt-10">
               <summary>Edit account</summary>
-              <form method="POST" action="/admin/users/<%= u.id %>/update" style="margin-top:10px;display:grid;gap:7px">
+              <form method="POST" action="/admin/users/<%= u.id %>/update" class="edit-grid">
                 <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
                 <input name="full_name" value="<%= u.full_name %>" required>
                 <input type="email" name="email" value="<%= u.email %>" required>
@@ -102,14 +102,14 @@
               </form>
             </details>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
+          <div class="actions-row">
             <% if (u.id !== currentUser.id && !u.is_primary_admin) { %>
-              <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this user account?');">
+              <form method="POST" action="/admin/users/<%= u.id %>/delete" data-confirm="Delete this user account?">
                 <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
                 <button class="btn btn-danger" type="submit">Delete</button>
               </form>
             <% } else if (u.is_primary_admin) { %>
-              <span style="font-size:.8rem;color:#1e4620;font-weight:600">Protected</span>
+              <span class="protected-label">Protected</span>
             <% } %>
           </div>
         </div>
@@ -124,18 +124,18 @@
     <% } %>
 
     <% if (showStudents) { %>
-      <h3 style="color:#1e4620;margin-top:32px">Students (<%= studentTotal %>)</h3>
+      <h3 class="group-heading-lg">Students (<%= studentTotal %>)</h3>
       <% if (!studentGroups.length) { %><div class="empty-state">No students found.</div><% } %>
       <% studentGroups.forEach(g => { %>
-        <h4 style="color:var(--primary);margin:24px 0 10px;border-bottom:2px solid #e2e5e2;padding-bottom:6px"><%= g.name %> <span class="badge"><%= g.students.length %></span></h4>
+        <h4 class="dept-heading"><%= g.name %> <span class="badge"><%= g.students.length %></span></h4>
         <% g.students.forEach(u => { %>
           <div class="resource-card">
-            <div style="flex:1">
+            <div class="grow">
               <div class="r-title"><%= u.full_name %></div>
               <div class="r-meta"><strong>Reg. No.:</strong> <%= u.registration_number || u.matric_or_staff_no || '—' %> · <%= u.email %></div>
-              <details style="margin-top:10px">
+              <details class="mt-10">
                 <summary>Edit student</summary>
-                <form method="POST" action="/admin/users/<%= u.id %>/update" style="margin-top:10px;display:grid;gap:7px">
+                <form method="POST" action="/admin/users/<%= u.id %>/update" class="edit-grid">
                   <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
                   <input name="full_name" value="<%= u.full_name %>" required>
                   <input type="email" name="email" value="<%= u.email %>" required>
@@ -150,8 +150,8 @@
                 </form>
               </details>
             </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this student account?');">
+            <div class="actions-row">
+              <form method="POST" action="/admin/users/<%= u.id %>/delete" data-confirm="Delete this student account?">
                 <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
                 <button class="btn btn-danger" type="submit">Delete</button>
               </form>
@@ -159,6 +159,13 @@
           </div>
         <% }) %>
       <% }) %>
+      <% if (studentTotalPages > 1) { %>
+        <div class="pagination">
+          <% if (spage > 1) { %><a class="btn btn-outline" href="/admin/users?q=<%= encodeURIComponent(q) %>&faculty_id=<%= facultyId || '' %>&department_id=<%= departmentId || '' %>&account_type=<%= accountType %>&page=<%= page %>&spage=<%= spage - 1 %>">Previous</a><% } %>
+          <span>Students page <%= spage %> of <%= studentTotalPages %></span>
+          <% if (spage < studentTotalPages) { %><a class="btn btn-outline" href="/admin/users?q=<%= encodeURIComponent(q) %>&faculty_id=<%= facultyId || '' %>&department_id=<%= departmentId || '' %>&account_type=<%= accountType %>&page=<%= page %>&spage=<%= spage + 1 %>">Next</a><% } %>
+        </div>
+      <% } %>
     <% } %>
   </div>
 </body>

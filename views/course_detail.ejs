@@ -16,7 +16,7 @@
     <% if (error && error.length) { %><div class="flash error"><%= error[0] %></div><% } %>
     <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
 
-    <p style="font-size:.88rem;color:#6b7280;">
+    <p class="hint">
       Owner: <strong><%= course.owner_department || '—' %></strong>
       <% if (course.level) { %> &middot; <%= course.level %><% } %>
       <% if (course.offered_departments) { %> &middot; Offered to: <%= course.offered_departments %><% } %>
@@ -37,9 +37,9 @@
             Uploaded by <%= r.uploader || 'Admin' %> on <%= new Date(r.created_at).toDateString() %>
             &middot; <%= (r.file_size/1024).toFixed(0) %> KB
           </div>
-          <% if (r.description) { %><div style="font-size:0.85rem; margin-top:6px;"><%= r.description %></div><% } %>
+          <% if (r.description) { %><div class="desc"><%= r.description %></div><% } %>
         </div>
-        <div style="display:flex; gap:8px;">
+        <div class="btn-row">
           <a class="btn" href="/resources/<%= r.id %>/download">Download</a>
           <% if (currentUser.accountType === 'administrator' || Number(r.uploaded_by) === Number(currentUser.id)) { %>
             <a class="btn btn-outline" href="/resources/<%= r.id %>/edit">Edit</a>

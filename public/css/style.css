@@ -69,6 +69,40 @@ button:hover, .btn:hover { background: var(--primary-light); }
 small { color:var(--muted); display:block; margin-top:6px; }
 .muted { color:var(--muted); font-size:0.88rem; }
 
+.nav-form { display:inline-block; margin-left:18px; }
+.nav-form button { background:none; border:none; color:#fff; cursor:pointer; font-size:0.92rem; padding:0; margin:0; font-family:inherit; }
+.nav-form button:hover { text-decoration:underline; }
+
+.m-0 { margin: 0; }
+.hint { font-size:0.86rem; color:var(--muted); }
+.small { font-size:0.85rem; }
+.lead { font-size:0.92rem; line-height:1.5; }
+.desc { font-size:0.85rem; margin-top:6px; }
+.break-all { word-break:break-all; font-size:0.85rem; }
+.back-link { margin-top:16px; font-size:0.88rem; }
+.group-heading { color:var(--primary); }
+.group-heading-lg { color:var(--primary); margin-top:32px; }
+.dept-heading { color:var(--primary); margin:24px 0 10px; border-bottom:2px solid var(--border); padding-bottom:6px; }
+.actions-row { display:flex; gap:8px; align-items:center; }
+.btn-row { display:flex; gap:8px; align-items:center; }
+.btn-row-sm { display:flex; gap:6px; }
+.flex-1-row { display:flex; gap:6px; flex:1; }
+.stack-row { margin-top:12px; display:flex; gap:8px; align-items:center; }
+.edit-grid { margin-top:10px; display:grid; gap:7px; }
+.edit-grid-sm { display:grid; gap:6px; }
+.check-grid { display:grid; gap:5px; }
+.grow { flex:1; }
+.mt-10 { margin-top:10px; }
+.mt-12 { margin-top:12px; }
+.mb-16 { margin-bottom:16px; }
+.card-wide { max-width:none; }
+.card-wide-mb { max-width:none; margin-bottom:22px; }
+.auth-container-lg { max-width:520px; }
+.protected-label { font-size:0.8rem; color:var(--primary); font-weight:600; }
+.demo-box { background:var(--bg); border:1px dashed #c8d0c8; border-radius:8px; padding:14px; margin:18px 0; }
+.demo-label { font-size:0.8rem; color:var(--muted); margin:0 0 8px; }
+.card-form h3 { margin-top:0; }
+
 .analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 .analytics-grid .card-form { margin-bottom:0; }
 .data-table { width:100%; border-collapse:collapse; font-size:0.88rem; margin-top:10px; }

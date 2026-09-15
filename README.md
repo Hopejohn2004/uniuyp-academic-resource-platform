@@ -45,9 +45,9 @@ diagrams/              Architecture, ERD, class, use-case and sequence diagrams
 ## Production note
 For a real deployment, use persistent cloud storage (e.g. S3) for uploaded files and a managed database rather than relying on the local SQLite/upload folders. See `DEPLOYMENT.md`.
 
-## V4 academic structure and access model
+## Academic structure and access model
 
-This version adds a normalized academic catalogue designed for a larger university deployment:
+The platform uses a normalized academic catalogue designed for a university deployment:
 
 - **Faculty → Department → User** hierarchy.
 - Students have a **registration number** and department.

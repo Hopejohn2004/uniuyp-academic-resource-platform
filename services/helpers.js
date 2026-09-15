@@ -17,9 +17,18 @@ function accountLabel(type, isPrimaryAdmin = false) {
   return 'Student';
 }
 
+function getDepartments(db) {
+  return db.prepare(
+    `SELECT d.id, d.name, d.faculty_id, f.name AS faculty_name
+     FROM departments d JOIN faculties f ON f.id = d.faculty_id
+     ORDER BY f.name, d.name`
+  ).all();
+}
+
 module.exports = {
   absoluteUrl,
   normalizeEmail,
   validPassword,
-  accountLabel
+  accountLabel,
+  getDepartments
 };

@@ -10,32 +10,81 @@ digraph ClassDiagram {
       <tr><td align="left">- id: int</td></tr>
       <tr><td align="left">- fullName: string</td></tr>
       <tr><td align="left">- email: string</td></tr>
-      <tr><td align="left">- password: string</td></tr>
-      <tr><td align="left">- role: string</td></tr>
+      <tr><td align="left">- passwordHash: string</td></tr>
+      <tr><td align="left">- accountType: string</td></tr>
+      <tr><td align="left">- departmentId: int</td></tr>
+      <tr><td align="left">- facultyId: int</td></tr>
+      <tr><td align="left">- canManageUsers: bool</td></tr>
+      <tr><td align="left">- isPrimaryAdmin: bool</td></tr>
+      <tr><td align="left">- emailVerified: bool</td></tr>
+      <tr><td align="left">- failedLoginAttempts: int</td></tr>
+      <tr><td align="left">- lockoutUntil: datetime</td></tr>
       <tr><td align="left">+ register()</td></tr>
       <tr><td align="left">+ login()</td></tr>
       <tr><td align="left">+ logout()</td></tr>
+      <tr><td align="left">+ changePassword()</td></tr>
     </table>
   >];
 
   Student [label=<
     <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
       <tr><td bgcolor="#eef3ee"><b>Student</b></td></tr>
-      <tr><td align="left">- matricNo: string</td></tr>
-      <tr><td align="left">- department: string</td></tr>
+      <tr><td align="left">- registrationNumber: string</td></tr>
+      <tr><td align="left">- level: string</td></tr>
       <tr><td align="left">+ searchResources()</td></tr>
       <tr><td align="left">+ downloadResource()</td></tr>
+      <tr><td align="left">+ viewDownloadHistory()</td></tr>
     </table>
   >];
 
-  Admin [label=<
+  Lecturer [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#eef3ee"><b>Lecturer</b></td></tr>
+      <tr><td align="left">- staffId: string</td></tr>
+      <tr><td align="left">+ uploadResource()</td></tr>
+      <tr><td align="left">+ editResource()</td></tr>
+      <tr><td align="left">+ deleteResource()</td></tr>
+      <tr><td align="left">+ viewMyUploads()</td></tr>
+    </table>
+  >];
+
+  Administrator [label=<
     <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
       <tr><td bgcolor="#fdf2e2"><b>Administrator</b></td></tr>
-      <tr><td align="left">- staffNo: string</td></tr>
-      <tr><td align="left">+ uploadResource()</td></tr>
-      <tr><td align="left">+ deleteResource()</td></tr>
-      <tr><td align="left">+ manageCategories()</td></tr>
-      <tr><td align="left">+ viewStatistics()</td></tr>
+      <tr><td align="left">- staffId: string</td></tr>
+      <tr><td align="left">+ manageUsers()</td></tr>
+      <tr><td align="left">+ manageAcademicStructure()</td></tr>
+      <tr><td align="left">+ viewAnalytics()</td></tr>
+      <tr><td align="left">+ all Lecturer abilities</td></tr>
+    </table>
+  >];
+
+  Faculty [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>Faculty</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- name: string</td></tr>
+    </table>
+  >];
+
+  Department [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>Department</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- name: string</td></tr>
+      <tr><td align="left">- facultyId: int</td></tr>
+    </table>
+  >];
+
+  Course [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>Course</b></font></td></tr>
+      <tr><td align="left">- id: int</td></tr>
+      <tr><td align="left">- code: string</td></tr>
+      <tr><td align="left">- title: string</td></tr>
+      <tr><td align="left">- ownerDepartmentId: int</td></tr>
+      <tr><td align="left">- level: string</td></tr>
+      <tr><td align="left"># offeredTo: Department[]</td></tr>
     </table>
   >];
 
@@ -44,9 +93,12 @@ digraph ClassDiagram {
       <tr><td bgcolor="#1e4620"><font color="white"><b>Resource</b></font></td></tr>
       <tr><td align="left">- id: int</td></tr>
       <tr><td align="left">- title: string</td></tr>
-      <tr><td align="left">- courseCode: string</td></tr>
+      <tr><td align="left">- courseId: int</td></tr>
+      <tr><td align="left">- categoryId: int</td></tr>
       <tr><td align="left">- fileName: string</td></tr>
+      <tr><td align="left">- originalName: string</td></tr>
       <tr><td align="left">- fileSize: int</td></tr>
+      <tr><td align="left">- level / semester / session</td></tr>
       <tr><td align="left">- uploadedBy: int</td></tr>
       <tr><td align="left">+ save()</td></tr>
       <tr><td align="left">+ delete()</td></tr>
@@ -73,9 +125,15 @@ digraph ClassDiagram {
   >];
 
   Student -> User [arrowhead=empty, label="  inherits"];
-  Admin -> User [arrowhead=empty, label="  inherits"];
+  Lecturer -> User [arrowhead=empty, label="  inherits"];
+  Administrator -> Lecturer [arrowhead=empty, label="  extends (all abilities)"];
+  Faculty -> Department [arrowhead=vee, label="  contains", dir=back];
+  Department -> User [arrowhead=vee, label="  enrols", dir=back];
+  Department -> Course [arrowhead=vee, label="  owns", dir=back];
+  Course -> Department [arrowhead=vee, label="  offered to (M:N)", dir=back];
   Resource -> Category [arrowhead=diamond, label="  belongs to"];
-  Resource -> Admin [arrowhead=vee, label="  uploaded by", dir=back];
+  Resource -> Course [arrowhead=vee, label="  linked to"];
+  Resource -> Lecturer [arrowhead=vee, label="  uploaded by", dir=back];
   Download -> Resource [arrowhead=vee, label="  references"];
-  Download -> Student [arrowhead=vee, label="  initiated by"];
+  Download -> User [arrowhead=vee, label="  initiated by"];
 }

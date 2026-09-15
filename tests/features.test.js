@@ -227,3 +227,95 @@ test('students cannot upload resources', async () => {
     db.prepare('DELETE FROM users WHERE id = ?').run(studentId);
   }
 });
+
+test('lecturer can replace the file of an existing resource', async () => {
+  const faculty = createFaculty(`RF Faculty ${Date.now()}`);
+  const dept = createDept(`RF Dept ${Date.now()}`, faculty);
+  const teacher = `rf.owner.${Date.now()}@example.com`;
+  const userId = createUser({ name: 'RF Owner', email: teacher, accountType: 'lecturer', deptId: dept });
+  const oldFileName = uploadedFile('old.txt');
+  const resourceId = db.prepare(
+    `INSERT INTO resources (title, course_id, file_name, original_name, file_size, uploaded_by, created_at)
+     VALUES (?, NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP)`
+  ).run('Original Title', oldFileName, 'old.txt', 12, userId).lastInsertRowid;
+
+  const server = await createServer();
+  let newFileOnDisk = null;
+  try {
+    const cookie = await login(server, teacher, 'password123');
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const page = await fetch(`${base}/resources/${resourceId}/edit`, { headers: { 'Cookie': cookie } });
+    const token = getCsrfFor(await page.text());
+
+    const form = new FormData();
+    form.append('csrfToken', token);
+    form.append('title', 'Updated With File');
+    form.append('file', new Blob(['new content 12345'], { type: 'text/plain' }), 'new.txt');
+
+    const res = await fetch(`${base}/resources/${resourceId}/edit`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: { 'Cookie': cookie },
+      body: form
+    });
+    assert.equal(res.status, 302);
+
+    const row = db.prepare('SELECT * FROM resources WHERE id = ?').get(resourceId);
+    assert.equal(row.original_name, 'new.txt');
+    assert.notEqual(row.file_name, oldFileName);
+
+    newFileOnDisk = path.join(uploadsDir, row.file_name);
+    assert.ok(fs.existsSync(newFileOnDisk), 'replacement file should exist on disk');
+    assert.equal(fs.readFileSync(newFileOnDisk, 'utf8'), 'new content 12345');
+    assert.ok(!fs.existsSync(path.join(uploadsDir, oldFileName)), 'old file should be removed');
+  } finally {
+    server.close();
+    if (newFileOnDisk) fs.rmSync(newFileOnDisk, { force: true });
+    fs.rmSync(path.join(uploadsDir, oldFileName), { force: true });
+    db.prepare('DELETE FROM downloads WHERE resource_id = ?').run(resourceId);
+    db.prepare('DELETE FROM resources WHERE id = ?').run(resourceId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    db.prepare('DELETE FROM departments WHERE id = ?').run(dept);
+    db.prepare('DELETE FROM faculties WHERE id = ?').run(faculty);
+  }
+});
+
+test('account locks after repeated failed login attempts', async () => {
+  const studentEmail = `lk.student.${Date.now()}@example.com`;
+  const userId = createUser({ name: 'LK Student', email: studentEmail, accountType: 'student', emailVerified: true });
+  const server = await createServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    // Pre-set 4 failed attempts so the next failure triggers lockout
+    db.prepare('UPDATE users SET failed_login_attempts = 4 WHERE id = ?').run(userId);
+
+    const get = await fetch(`${base}/login`);
+    const token = getCsrfFor(await get.text());
+    const cookie = get.headers.getSetCookie().join('; ');
+
+    await fetch(`${base}/login`, {
+      method: 'POST', redirect: 'manual',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookie },
+      body: new URLSearchParams({ email: studentEmail, password: 'wrongpass', csrfToken: token }).toString()
+    });
+
+    const row = db.prepare('SELECT failed_login_attempts, lockout_until FROM users WHERE id = ?').get(userId);
+    assert.equal(row.failed_login_attempts, 0, 'counter should reset when lockout is issued');
+    assert.ok(row.lockout_until, 'user should be locked out');
+    assert.ok(new Date(row.lockout_until) > new Date(), 'lockout should be in the future');
+
+    const lockoutGet = await fetch(`${base}/login`);
+    const lockoutToken = getCsrfFor(await lockoutGet.text());
+    const lockoutCookie = lockoutGet.headers.getSetCookie().join('; ');
+    const res = await fetch(`${base}/login`, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': lockoutCookie },
+      body: new URLSearchParams({ email: studentEmail, password: 'password123', csrfToken: lockoutToken }).toString()
+    });
+    const body = await res.text();
+    assert.match(body, /locked/i);
+  } finally {
+    server.close();
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+  }
+});

@@ -12,12 +12,13 @@ const SqliteSessionStore = require('./session-store');
 
 // --- Services ---
 const emailService = require('./services/email');
-const { absoluteUrl, normalizeEmail, validPassword, accountLabel } = require('./services/helpers');
+const { absoluteUrl, normalizeEmail, validPassword, accountLabel, getDepartments: getDepartmentsFn } = require('./services/helpers');
 
 // --- Middleware ---
 const rateLimit = require('./middleware/rateLimit');
 const { ensureCsrf, verifyCsrf } = require('./middleware/csrf');
-const { requireLogin, requireLecturer, requireSuperAdmin } = require('./middleware/auth');
+const { requireLogin, requireSuperAdmin } = require('./middleware/auth');
+const requireLecturerMw = require('./middleware/auth').requireLecturer(db);
 const requireSuperAdminMw = requireSuperAdmin(db);
 
 // --- Routes ---
@@ -58,7 +59,7 @@ app.use((req, res, next) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'"
+    "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'"
   );
   next();
 });
@@ -94,38 +95,28 @@ app.use((req, res, next) => {
 });
 
 // ==============================
-//  SHARED HELPERS FOR ROUTES
-// ==============================
-
-function getDepartments() {
-  return db.prepare(
-    `SELECT d.id, d.name, d.faculty_id, f.name AS faculty_name
-     FROM departments d JOIN faculties f ON f.id = d.faculty_id
-     ORDER BY f.name, d.name`
-  ).all();
-}
-
-// ==============================
 //  ROUTES
 // ==============================
 
 // Auth routes (register, login, logout, password reset, etc.)
 app.use(createAuthRoutes({
-  db, rateLimit, absoluteUrl, normalizeEmail, validPassword, emailService, getDepartments, baseUrl: BASE_URL
+  db, rateLimit, absoluteUrl, normalizeEmail, validPassword, emailService,
+  getDepartments: () => getDepartmentsFn(db), baseUrl: BASE_URL
 }));
 
 // Dashboard & root redirect
 app.use(createDashboardRoutes({ db, requireLogin }));
 
 // Resource management (upload, edit, delete, download, my pages)
-app.use(createResourceRoutes({ db, rateLimit, requireLogin, requireLecturer, verifyCsrf }));
+app.use(createResourceRoutes({ db, rateLimit, requireLogin, requireLecturer: requireLecturerMw, verifyCsrf }));
 
 // Course catalog
 app.use(createCourseRoutes({ db, requireLogin }));
 
 // Admin routes (user management, academic structure, analytics)
 app.use(createAdminRoutes({
-  db, rateLimit, requireLogin, requireSuperAdmin: requireSuperAdminMw, normalizeEmail, validPassword, accountLabel
+  db, rateLimit, requireLogin, requireSuperAdmin: requireSuperAdminMw, normalizeEmail, validPassword, accountLabel,
+  getDepartments: () => getDepartmentsFn(db)
 }));
 
 // ==============================

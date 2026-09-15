@@ -49,13 +49,13 @@
             Uploaded by <%= r.uploader || 'Admin' %> on <%= new Date(r.created_at).toDateString() %>
             &middot; <%= (r.file_size/1024).toFixed(0) %> KB
           </div>
-          <% if (r.description) { %><div style="font-size:0.85rem; margin-top:6px;"><%= r.description %></div><% } %>
+          <% if (r.description) { %><div class="desc"><%= r.description %></div><% } %>
         </div>
-        <div style="display:flex; gap:8px;">
+        <div class="btn-row">
           <a class="btn" href="/resources/<%= r.id %>/download">Download</a>
           <% if (currentUser.accountType === 'administrator' || Number(r.uploaded_by) === Number(currentUser.id)) { %>
             <a class="btn btn-outline" href="/resources/<%= r.id %>/edit">Edit</a>
-            <form method="POST" action="/resources/<%= r.id %>/delete" onsubmit="return confirm('Delete this resource?');">
+            <form method="POST" action="/resources/<%= r.id %>/delete" data-confirm="Delete this resource?">
               <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
               <button type="submit" class="btn btn-danger">Delete</button>
             </form>

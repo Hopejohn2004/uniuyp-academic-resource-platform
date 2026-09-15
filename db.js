@@ -126,6 +126,8 @@ addColumn('users', 'staff_id', 'TEXT');
 addColumn('users', 'faculty_id', 'INTEGER');
 addColumn('users', 'department_id', 'INTEGER');
 addColumn('users', 'level', 'TEXT');
+addColumn('users', 'failed_login_attempts', 'INTEGER NOT NULL DEFAULT 0');
+addColumn('users', 'lockout_until', 'TEXT');
 addColumn('resources', 'course_id', 'INTEGER');
 addColumn('resources', 'level', 'TEXT');
 addColumn('resources', 'semester', 'TEXT');

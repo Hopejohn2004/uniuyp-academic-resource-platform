@@ -30,10 +30,10 @@
             &middot; <%= (r.file_size/1024).toFixed(0) %> KB
           </div>
         </div>
-        <div style="display:flex; gap:8px;">
+        <div class="btn-row">
           <a class="btn" href="/resources/<%= r.id %>/download">View / Download</a>
           <a class="btn btn-outline" href="/resources/<%= r.id %>/edit">Edit</a>
-          <form method="POST" action="/resources/<%= r.id %>/delete" onsubmit="return confirm('Delete this resource?');">
+          <form method="POST" action="/resources/<%= r.id %>/delete" data-confirm="Delete this resource?">
             <input type="hidden" name="csrfToken" value="<%= csrfToken %>" />
             <button type="submit" class="btn btn-danger">Delete</button>
           </form>

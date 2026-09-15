@@ -6,12 +6,22 @@ function requireLogin(req, res, next) {
   next();
 }
 
-function requireLecturer(req, res, next) {
-  if (!req.session.user || !['lecturer', 'administrator'].includes(req.session.user.accountType)) {
-    req.flash('error', 'Lecturer/administrator access only.');
-    return res.redirect('/dashboard');
-  }
-  next();
+function requireLecturer(db) {
+  return (req, res, next) => {
+    if (!req.session.user) {
+      req.flash('error', 'Please log in to continue.');
+      return res.redirect('/login');
+    }
+    const user = db.prepare(
+      'SELECT id, account_type FROM users WHERE id = ?'
+    ).get(req.session.user.id);
+    if (!user || !['lecturer', 'administrator'].includes(user.account_type)) {
+      req.flash('error', 'Lecturer/administrator access only.');
+      return res.redirect('/dashboard');
+    }
+    req.session.user.accountType = user.account_type;
+    next();
+  };
 }
 
 function requireSuperAdmin(db) {

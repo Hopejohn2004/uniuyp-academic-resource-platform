@@ -145,7 +145,7 @@ module.exports = function createResourceRoutes(config) {
   });
 
   // ---- Edit (POST) ----
-  router.post('/resources/:id/edit', requireLogin, requireLecturer, (req, res) => {
+  router.post('/resources/:id/edit', requireLogin, requireLecturer, rateLimit({ max: 20 }), upload.single('file'), verifyCsrf, (req, res) => {
     const resource = db.prepare('SELECT * FROM resources WHERE id = ?').get(req.params.id);
     if (!resource) {
       req.flash('error', 'Resource not found.');
@@ -159,11 +159,24 @@ module.exports = function createResourceRoutes(config) {
     const courseId = req.body.course_id ? Number(req.body.course_id) : null;
     const course = courseId && db.prepare('SELECT id, code FROM courses WHERE id = ?').get(courseId);
     if (!title || title.length < 2) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
       req.flash('error', 'Please provide a valid resource title.');
       return res.redirect(`/resources/${resource.id}/edit`);
     }
+
+    let newFileName = resource.file_name;
+    let newOriginalName = resource.original_name;
+    let newFileSize = resource.file_size;
+
+    if (req.file) {
+      if (resource.file_name) fs.rmSync(path.join(UPLOADS_DIR, resource.file_name), { force: true });
+      newFileName = req.file.filename;
+      newOriginalName = req.file.originalname;
+      newFileSize = req.file.size;
+    }
+
     db.prepare(
-      `UPDATE resources SET title = ?, description = ?, course_id = ?, course_code = ?, category_id = ?, level = ?, semester = ?, academic_session = ? WHERE id = ?`
+      `UPDATE resources SET title = ?, description = ?, course_id = ?, course_code = ?, category_id = ?, level = ?, semester = ?, academic_session = ?, file_name = ?, original_name = ?, file_size = ? WHERE id = ?`
     ).run(
       title,
       String(req.body.description || '').trim(),
@@ -173,6 +186,9 @@ module.exports = function createResourceRoutes(config) {
       String(req.body.level || '').trim(),
       String(req.body.semester || '').trim(),
       String(req.body.academic_session || '').trim(),
+      newFileName,
+      newOriginalName,
+      newFileSize,
       resource.id
     );
     req.flash('success', `"${title}" was updated successfully.`);

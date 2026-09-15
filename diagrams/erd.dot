@@ -9,12 +9,63 @@ digraph ERD {
       <tr><td bgcolor="#1e4620"><font color="white"><b>USERS</b></font></td></tr>
       <tr><td align="left">PK  id</td></tr>
       <tr><td align="left">full_name</td></tr>
-      <tr><td align="left">matric_or_staff_no</td></tr>
+      <tr><td align="left">matric_or_staff_no (legacy)</td></tr>
       <tr><td align="left">email (unique)</td></tr>
-      <tr><td align="left">password (hashed)</td></tr>
-      <tr><td align="left">department</td></tr>
-      <tr><td align="left">role (student / admin)</td></tr>
+      <tr><td align="left">password (bcrypt)</td></tr>
+      <tr><td align="left">account_type (student / lecturer / administrator)</td></tr>
+      <tr><td align="left">registration_number</td></tr>
+      <tr><td align="left">staff_id</td></tr>
+      <tr><td align="left">FK  faculty_id</td></tr>
+      <tr><td align="left">FK  department_id</td></tr>
+      <tr><td align="left">level</td></tr>
+      <tr><td align="left">can_manage_users</td></tr>
+      <tr><td align="left">is_primary_admin</td></tr>
+      <tr><td align="left">email_verified</td></tr>
+      <tr><td align="left">failed_login_attempts</td></tr>
+      <tr><td align="left">lockout_until</td></tr>
+      <tr><td align="left">reset_token / reset_expires</td></tr>
+      <tr><td align="left">verification_token / verification_expires</td></tr>
       <tr><td align="left">created_at</td></tr>
+    </table>
+  >];
+
+  FACULTIES [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>FACULTIES</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">name (unique)</td></tr>
+      <tr><td align="left">created_at</td></tr>
+    </table>
+  >];
+
+  DEPARTMENTS [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>DEPARTMENTS</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">name</td></tr>
+      <tr><td align="left">FK  faculty_id</td></tr>
+      <tr><td align="left">created_at</td></tr>
+      <tr><td align="left">UNIQUE (name, faculty_id)</td></tr>
+    </table>
+  >];
+
+  COURSES [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>COURSES</b></font></td></tr>
+      <tr><td align="left">PK  id</td></tr>
+      <tr><td align="left">code (unique)</td></tr>
+      <tr><td align="left">title</td></tr>
+      <tr><td align="left">FK  owner_department_id</td></tr>
+      <tr><td align="left">level</td></tr>
+      <tr><td align="left">created_at</td></tr>
+    </table>
+  >];
+
+  COURSE_DEPARTMENTS [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>COURSE_DEPARTMENTS</b></font></td></tr>
+      <tr><td align="left">PK,FK  course_id</td></tr>
+      <tr><td align="left">PK,FK  department_id</td></tr>
     </table>
   >];
 
@@ -24,8 +75,10 @@ digraph ERD {
       <tr><td align="left">PK  id</td></tr>
       <tr><td align="left">title</td></tr>
       <tr><td align="left">description</td></tr>
-      <tr><td align="left">course_code</td></tr>
+      <tr><td align="left">course_code (legacy)</td></tr>
+      <tr><td align="left">FK  course_id</td></tr>
       <tr><td align="left">FK  category_id</td></tr>
+      <tr><td align="left">level / semester / academic_session</td></tr>
       <tr><td align="left">file_name</td></tr>
       <tr><td align="left">original_name</td></tr>
       <tr><td align="left">file_size</td></tr>
@@ -38,7 +91,7 @@ digraph ERD {
     <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
       <tr><td bgcolor="#1e4620"><font color="white"><b>CATEGORIES</b></font></td></tr>
       <tr><td align="left">PK  id</td></tr>
-      <tr><td align="left">name</td></tr>
+      <tr><td align="left">name (unique)</td></tr>
     </table>
   >];
 
@@ -52,6 +105,21 @@ digraph ERD {
     </table>
   >];
 
+  SESSIONS [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="6" bgcolor="white" color="#1e4620">
+      <tr><td bgcolor="#1e4620"><font color="white"><b>SESSIONS</b></font></td></tr>
+      <tr><td align="left">PK  sid</td></tr>
+      <tr><td align="left">sess (JSON)</td></tr>
+      <tr><td align="left">expires</td></tr>
+    </table>
+  >];
+
+  FACULTIES -> DEPARTMENTS [taillabel="1", headlabel="M", label="contains"];
+  DEPARTMENTS -> USERS [taillabel="1", headlabel="M", label="enrols"];
+  DEPARTMENTS -> COURSES [taillabel="1", headlabel="M", label="owns"];
+  COURSES -> COURSE_DEPARTMENTS [taillabel="1", headlabel="M", label="offered to"];
+  DEPARTMENTS -> COURSE_DEPARTMENTS [taillabel="1", headlabel="M", label="takes part in"];
+  COURSES -> RESOURCES [taillabel="1", headlabel="M", label="holds"];
   USERS -> RESOURCES [taillabel="1", headlabel="M", label="uploads"];
   CATEGORIES -> RESOURCES [taillabel="1", headlabel="M", label="classifies"];
   USERS -> DOWNLOADS [taillabel="1", headlabel="M", label="performs"];

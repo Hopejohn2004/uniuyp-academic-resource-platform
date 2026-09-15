@@ -17,7 +17,7 @@
     <% if (success && success.length) { %><div class="flash success"><%= success[0] %></div><% } %>
 
     <div class="card-form">
-      <form method="POST" action="/resources/<%= resource.id %>/edit">
+      <form method="POST" action="/resources/<%= resource.id %>/edit" enctype="multipart/form-data">
         <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
         <label>Title</label>
         <input name="title" value="<%= resource.title %>" required>
@@ -47,7 +47,9 @@
         </select>
         <label>Description</label>
         <textarea name="description" rows="3"><%= resource.description || '' %></textarea>
-        <small>Metadata only. To replace the uploaded file, delete this resource and upload a new one.</small>
+        <label>Replace file (optional)</label>
+        <small>Current file: <%= resource.original_name %> (<%= (resource.file_size/1024).toFixed(0) %> KB)</small>
+        <input type="file" name="file">
         <button type="submit">Save Changes</button>
       </form>
     </div>

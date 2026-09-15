@@ -98,14 +98,39 @@ module.exports = function createAuthRoutes(config) {
     const email = normalizeEmail(req.body.email);
     const password = req.body.password || '';
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      req.flash('error', 'Invalid email or password.');
+
+    // Account lockout
+    const MAX_ATTEMPTS = 5;
+    const LOCKOUT_MS = 15 * 60 * 1000;
+    if (user && user.lockout_until && new Date(user.lockout_until) > new Date()) {
+      const mins = Math.max(1, Math.ceil((new Date(user.lockout_until) - new Date()) / 60000));
+      req.flash('error', `Too many failed login attempts. Account is locked. Try again in ${mins} minute${mins === 1 ? '' : 's'}.`);
       return res.redirect('/login');
     }
+
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      if (user) {
+        const attempts = (user.failed_login_attempts || 0) + 1;
+        if (attempts >= MAX_ATTEMPTS) {
+          db.prepare('UPDATE users SET failed_login_attempts = 0, lockout_until = ? WHERE id = ?')
+            .run(new Date(Date.now() + LOCKOUT_MS).toISOString(), user.id);
+          req.flash('error', 'Too many failed attempts. Account locked for 15 minutes.');
+        } else {
+          db.prepare('UPDATE users SET failed_login_attempts = ? WHERE id = ?').run(attempts, user.id);
+          req.flash('error', `Invalid email or password. ${MAX_ATTEMPTS - attempts} attempt${MAX_ATTEMPTS - attempts === 1 ? '' : 's'} remaining.`);
+        }
+      } else {
+        req.flash('error', 'Invalid email or password.');
+      }
+      return res.redirect('/login');
+    }
+
     if (!user.email_verified) {
       req.flash('error', 'Please verify your email before logging in.');
       return res.redirect('/login');
     }
+
+    db.prepare('UPDATE users SET failed_login_attempts = 0, lockout_until = NULL WHERE id = ?').run(user.id);
     req.session.regenerate(err => {
       if (err) return res.status(500).send('Unable to start session.');
       req.session.csrfToken = crypto.randomBytes(32).toString('hex');
@@ -174,7 +199,7 @@ module.exports = function createAuthRoutes(config) {
   });
 
   // ---- Logout ----
-  router.get('/logout', (req, res) => {
+  router.post('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login'));
   });
 

@@ -8,10 +8,14 @@
       <% if (!['lecturer','administrator'].includes(currentUser.accountType)) { %><a href="/my-downloads">My Downloads</a><% } %>
       <% if (currentUser.canManageUsers) { %><a href="/admin/users">Manage Users</a><a href="/admin/academics">Academic Structure</a><a href="/admin/analytics">Analytics</a><% } %>
       <a href="/change-password">Change Password</a>
-      <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
+      <form class="nav-form" method="POST" action="/logout">
+        <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+        <button type="submit">Logout (<%= currentUser.full_name %>)</button>
+      </form>
     <% } else { %>
       <a href="/login">Login</a>
       <a href="/register">Register</a>
     <% } %>
   </div>
 </div>
+<script src="/js/app.js" defer></script>
